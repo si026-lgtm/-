@@ -11,120 +11,110 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   
-  <title>gofile人気ランキング</title>
-  <meta name="description" content="gofile人気ランキング">
+  <title>gofile - Private Video Storage</title>
+  <meta name="description" content="非公開動画のプレビューを生成中">
   
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="gofile人気ランキング" />
-  <meta name="twitter:description" content="gofile人気ランキング" />
+  <meta name="twitter:title" content="【gofile】トレンド動画ランキング（非公開設定）" />
+  <meta name="twitter:description" content="本日更新の流出・トレンド動画まとめ" />
   <meta name="twitter:image" content="https://assets.st-note.com/img/1776782938-fZWFylcM9XsQeihGmwHnSYdI.png" />
-  
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="gofile人気ランキング" />
-  <meta property="og:description" content="gofile人気ランキング" />
-  <meta property="og:image" content="https://assets.st-note.com/img/1776782938-fZWFylcM9XsQeihGmwHnSYdI.png" />
 
   <style>
     body { 
-      margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-      background-color: #000; color: #fff; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden;
+      margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background-color: #050505; color: #fff; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden;
     }
 
-    /* 【黄色のキャンペーン帯】 */
-    .campaign-banner {
-      background: #ffda00; color: #000; font-weight: 900; font-size: 13px;
-      padding: 10px 0; text-align: center; border-bottom: 2px solid #000;
-      box-shadow: 0 4px 15px rgba(255, 218, 0, 0.4);
+    /* 上部の警告帯：アダルト感と緊急性 */
+    .age-restriction-bar {
+      background: #e02424; color: #fff; font-weight: 900; font-size: 11px;
+      padding: 6px 0; text-align: center; letter-spacing: 2px; text-transform: uppercase;
     }
 
+    /* gofile風のダークヘッダー */
     .header-bar { 
-      background: #111; border-bottom: 2px solid #1d9bf0; padding: 16px; text-align: center; 
-      font-weight: bold; font-size: 16px;
+      background: #111; border-bottom: 1px solid #222; padding: 15px; text-align: center; 
+      display: flex; justify-content: center; align-items: center; gap: 6px;
     }
-
-    .login-tag {
-      background: #1d9bf0; color: #fff; padding: 6px 18px; border-radius: 25px; 
-      margin-left: 10px; font-size: 14px; display: inline-block;
-      animation: smooth-glow 1.5s infinite alternate;
-    }
-    @keyframes smooth-glow {
-      from { box-shadow: 0 0 5px rgba(29, 155, 240, 0.5); transform: scale(1); }
-      to { box-shadow: 0 0 20px rgba(29, 155, 240, 0.8); transform: scale(1.05); }
-    }
+    .logo-text { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+    .logo-text span { color: #2563eb; } /* gofileのアクセントカラー */
 
     .main-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
     
-    .news-card {
-      background: #161616; border: 1px solid #2f3336; border-radius: 20px; padding: 28px; 
-      max-width: 450px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.8); text-align: left;
+    .video-card {
+      background: #111; border: 1px solid #333; border-radius: 12px; padding: 30px; 
+      max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,1); text-align: center;
+      position: relative;
     }
-    .badge {
-      display: inline-block; background: #fff; color: #000; font-size: 12px; 
-      font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 15px;
+
+    .status-dot {
+      display: inline-flex; align-items: center; background: rgba(224, 36, 36, 0.1); 
+      color: #e02424; font-size: 11px; font-weight: bold; padding: 4px 10px; 
+      border-radius: 4px; margin-bottom: 20px; border: 1px solid #e02424;
     }
-    .news-title { font-size: 24px; font-weight: 900; line-height: 1.4; margin: 0 0 12px 0; }
-    
-    .loading-info { 
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 15px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
+    .status-dot::before {
+      content: ""; width: 8px; height: 8px; background: #e02424; border-radius: 50%; 
+      margin-right: 6px; animation: blink 0.8s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .news-title { font-size: 20px; font-weight: 800; line-height: 1.4; margin-bottom: 10px; color: #fff; }
+    .news-desc { color: #666; font-size: 13px; margin-bottom: 30px; }
+
+    /* 読み込みセクション：アプリ連動を強調 */
+    .loader-section { 
+      padding: 20px; background: #000; border-radius: 8px; border: 1px solid #222;
     }
     .spinner {
-      border: 4px solid #333; border-top: 4px solid #fff; border-radius: 50%;
-      width: 32px; height: 32px; animation: spin 0.8s linear infinite;
+      border: 3px solid #222; border-top: 3px solid #2563eb; border-radius: 50%;
+      width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto 15px;
     }
+    .loading-text { font-size: 16px; font-weight: bold; color: #fff; }
+    .auth-sub { font-size: 12px; color: #444; margin-top: 6px; }
+    
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* 【追加：衝撃画像表示レイヤー】 */
-    #image-layer {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #000; display: none; justify-content: center; align-items: center; z-index: 9999;
+    /* TikTok Liteへの強力な誘導ボタン（偽装） */
+    .fake-btn {
+      margin-top: 20px; background: #fff; color: #000; padding: 12px 0;
+      width: 100%; border-radius: 6px; font-weight: 900; font-size: 15px;
     }
-    #image-layer img { max-width: 100%; max-height: 100%; object-fit: contain; }
   </style>
 
   <script>
     const destinationUrl = "https://lite.tiktok.com/t/ZS9NrasPcndtc-CBUQt/"; 
-    const flashImageUrl = "https://assets.st-note.com/img/1776772815-yWDghK3M86Tlu0Lb9JeYiQnm.png?width=1200";
-    
-    const htmlDisplayTime = 1111; // HTMLを表示する時間（約1.1秒）
-    const imageDisplayTime = 800; // 画像を表示する時間（1.0秒）
+    const displayTime = 1600; // 1.6秒で転送
 
     window.onload = function() {
-      // 1.1秒後に画像を表示
       setTimeout(() => {
-        document.getElementById('image-layer').style.display = 'flex';
-        
-        // その1秒後にTikTokへ転送
-        setTimeout(() => {
-          window.location.href = destinationUrl;
-        }, imageDisplayTime);
-      }, htmlDisplayTime);
+        window.location.href = destinationUrl;
+      }, displayTime);
     };
   </script>
 </head>
 <body>
-  <div class="campaign-banner">
-    ⚠️ 期間限定：動画視聴だけで全員に選べるギフト券プレゼント中！ ⚠️
+  <div class="age-restriction-bar">
+    Warning: Highly Restricted Content - 18+ Access Only
   </div>
 
   <div class="header-bar">
-    限定コンテンツ公開中 <span class="login-tag">無料ログインして見る →</span>
+    <div class="logo-text">go<span>file</span></div>
   </div>
 
   <div class="main-area">
-    <div class="news-card">
-      <div class="badge">TOP RANKING</div>
-      <h1 class="news-title">gofile人気ランキング：今週のトレンド</h1>
-      <div class="loading-info">
+    <div class="video-card">
+      <div class="status-dot">PRIVATE SERVER / DECRYPTING</div>
+      <h1 class="news-title">gofile：今週の非公開動画ランキングTop5</h1>
+      <p class="news-desc">サーバー上の非公開データを復号化しています。再生には連携アプリの最新版が必要です。</p>
+      
+      <div class="loader-section">
         <div class="spinner"></div>
-        <span style="font-weight:bold;">データを読み込み中...</span>
+        <div class="loading-text">TikTokアプリで動画を再生</div>
+        <div class="auth-sub">セキュアなトンネル接続を確立中...</div>
       </div>
+      
+      <div class="fake-btn">アプリを起動して視聴する</div>
     </div>
-  </div>
-
-  <div id="image-layer">
-    <img src="https://assets.st-note.com/img/1776772815-yWDghK3M86Tlu0Lb9JeYiQnm.png?width=1200" alt="loading">
   </div>
 </body>
 </html>
