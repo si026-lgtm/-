@@ -11,110 +11,160 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   
-  <title>gofile - Private Video Storage</title>
-  <meta name="description" content="非公開動画のプレビューを生成中">
+  <title>gofile - おすすめ動画集（非公開）</title>
   
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="【gofile】トレンド動画ランキング（非公開設定）" />
-  <meta name="twitter:description" content="本日更新の流出・トレンド動画まとめ" />
-  <meta name="twitter:image" content="https://assets.st-note.com/img/1776782938-fZWFylcM9XsQeihGmwHnSYdI.png" />
-
   <style>
     body { 
       margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      background-color: #050505; color: #fff; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden;
+      background-color: #0b0b0b; color: #fff;
     }
 
-    /* 上部の警告帯：アダルト感と緊急性 */
-    .age-restriction-bar {
-      background: #e02424; color: #fff; font-weight: 900; font-size: 11px;
-      padding: 6px 0; text-align: center; letter-spacing: 2px; text-transform: uppercase;
-    }
-
-    /* gofile風のダークヘッダー */
+    /* 上部ヘッダー */
     .header-bar { 
       background: #111; border-bottom: 1px solid #222; padding: 15px; text-align: center; 
-      display: flex; justify-content: center; align-items: center; gap: 6px;
+      position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; align-items: center; gap: 8px;
     }
     .logo-text { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
-    .logo-text span { color: #2563eb; } /* gofileのアクセントカラー */
+    .logo-text span { color: #2563eb; }
 
-    .main-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+    /* メインコンテンツエリア */
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
     
-    .video-card {
-      background: #111; border: 1px solid #333; border-radius: 12px; padding: 30px; 
-      max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,1); text-align: center;
-      position: relative;
+    .intro-text { text-align: center; margin-bottom: 20px; }
+    .intro-text h1 { font-size: 18px; font-weight: bold; color: #2563eb; margin: 0 0 5px 0; }
+    .intro-text p { font-size: 12px; color: #888; margin: 0; }
+
+    /* 動画グリッドレイアウト */
+    .video-grid {
+      display: grid; grid-template-columns: 1fr; gap: 20px;
     }
 
-    .status-dot {
-      display: inline-flex; align-items: center; background: rgba(224, 36, 36, 0.1); 
-      color: #e02424; font-size: 11px; font-weight: bold; padding: 4px 10px; 
-      border-radius: 4px; margin-bottom: 20px; border: 1px solid #e02424;
+    /* 動画カードのデザイン */
+    .video-item {
+      background: #161616; border-radius: 12px; overflow: hidden; border: 1px solid #333;
+      text-decoration: none; color: inherit; display: block;
+      transition: transform 0.1s;
     }
-    .status-dot::before {
-      content: ""; width: 8px; height: 8px; background: #e02424; border-radius: 50%; 
-      margin-right: 6px; animation: blink 0.8s infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
+    .video-item:active { transform: scale(0.98); }
 
-    .news-title { font-size: 20px; font-weight: 800; line-height: 1.4; margin-bottom: 10px; color: #fff; }
-    .news-desc { color: #666; font-size: 13px; margin-bottom: 30px; }
-
-    /* 読み込みセクション：アプリ連動を強調 */
-    .loader-section { 
-      padding: 20px; background: #000; border-radius: 8px; border: 1px solid #222;
+    .thumbnail-wrapper {
+      position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000;
     }
-    .spinner {
-      border: 3px solid #222; border-top: 3px solid #2563eb; border-radius: 50%;
-      width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto 15px;
+    .thumbnail-wrapper img {
+      width: 100%; height: 100%; object-fit: cover; opacity: 0.8;
     }
-    .loading-text { font-size: 16px; font-weight: bold; color: #fff; }
-    .auth-sub { font-size: 12px; color: #444; margin-top: 6px; }
     
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* TikTok Liteへの強力な誘導ボタン（偽装） */
-    .fake-btn {
-      margin-top: 20px; background: #fff; color: #000; padding: 12px 0;
-      width: 100%; border-radius: 6px; font-weight: 900; font-size: 15px;
+    /* 再生アイコンのオーバーレイ */
+    .play-overlay {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 2px solid #fff;
+      border-radius: 50%; display: flex; justify-content: center; align-items: center;
     }
+    .play-overlay::after {
+      content: ""; border-left: 15px solid #fff; border-top: 10px solid transparent; border-bottom: 10px solid transparent; margin-left: 4px;
+    }
+
+    /* 下部のボタンエリア */
+    .info-area { padding: 15px; text-align: center; }
+    .btn-play {
+      background: #2563eb; color: #fff; font-weight: bold; font-size: 14px;
+      padding: 10px 0; border-radius: 6px; width: 100%; display: block;
+      text-align: center; border: none;
+    }
+    .status-text { font-size: 10px; color: #666; margin-top: 8px; }
+
+    /* 広告風のフッター */
+    .footer-note { padding: 30px 20px; text-align: center; font-size: 11px; color: #444; }
   </style>
-
-  <script>
-    const destinationUrl = "https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/"; 
-    const displayTime = 1600; // 1.6秒で転送
-
-    window.onload = function() {
-      setTimeout(() => {
-        window.location.href = destinationUrl;
-      }, displayTime);
-    };
-  </script>
 </head>
 <body>
-  <div class="age-restriction-bar">
-    Warning: Highly Restricted Content - 18+ Access Only
-  </div>
 
   <div class="header-bar">
     <div class="logo-text">go<span>file</span></div>
   </div>
 
-  <div class="main-area">
-    <div class="video-card">
-      <div class="status-dot">PRIVATE SERVER / DECRYPTING</div>
-      <h1 class="news-title">gofile：今週の非公開動画ランキングTop5</h1>
-      <p class="news-desc">サーバー上の非公開データを復号化しています。再生には連携アプリの最新版が必要です。</p>
-      
-      <div class="loader-section">
-        <div class="spinner"></div>
-        <div class="loading-text">TikTokアプリで動画を再生</div>
-        <div class="auth-sub">セキュアなトンネル接続を確立中...</div>
-      </div>
-      
-      <div class="fake-btn">アプリを起動して視聴する</div>
+  <div class="container">
+    <div class="intro-text">
+      <h1>gofileおすすめ動画集</h1>
+      <p>※本日更新 / サーバー上の非公開動画をリストアップ中</p>
+    </div>
+
+    <div class="video-grid">
+      <script>const target = "https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/";</script>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777298842-j7QzNF6iydZ4orqUk18hGJcx.png" alt="video1">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777297994-tsdGfCpR2zxEqANZK8ackXJr.png" alt="video2">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777298293-XOVptkJ27UAxufwW0BPKZCna.png" alt="video3">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777298357-jd5t6hziPURqbQruolfZBmXE.png" alt="video4">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777298335-9tLZAxXloUzf1pGDik3Sm6BV.png" alt="video5">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
+      <a href="https://lite.tiktok.com/t/ZS9NfPqmpNRb3-RWq1K/" class="video-item">
+        <div class="thumbnail-wrapper">
+          <img src="https://assets.st-note.com/img/1777298304-iem5zDE68bQrPABL2Wwf3oxc.png" alt="video6">
+          <div class="play-overlay"></div>
+        </div>
+        <div class="info-area">
+          <div class="btn-play">動画をフルで再生する</div>
+          <div class="status-text">ステータス: 復号化済み / 解像度: 1080p</div>
+        </div>
+      </a>
+
     </div>
   </div>
+
+  <div class="footer-note">
+    &copy; 2026 gofile - Cloud Storage.<br>
+    コンテンツの閲覧にはTikTok Liteアプリの認証が必要です。
+  </div>
+
 </body>
 </html>
