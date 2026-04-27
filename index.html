@@ -10,7 +10,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>gofile - おすすめ動画集（非公開）</title>
+  <title>gofile - Streaming Server</title>
   
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: #0b0b0b; color: #fff; }
@@ -19,38 +19,38 @@
     .logo-text span { color: #2563eb; }
     
     .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .intro-text { text-align: center; margin-bottom: 20px; border: 1px solid #e02424; padding: 10px; border-radius: 8px; background: rgba(224, 36, 36, 0.05); }
+    .intro-text { text-align: center; margin-bottom: 20px; padding: 10px; border-radius: 8px; background: rgba(37, 99, 235, 0.05); border: 1px solid #2563eb; }
     .intro-text h1 { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-    .follow-note { font-size: 11px; color: #e02424; font-weight: bold; line-height: 1.4; }
+    .status-line { font-size: 11px; color: #2563eb; font-family: monospace; font-weight: bold; }
 
     .video-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
     .video-item { background: #161616; border-radius: 12px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; display: block; cursor: pointer; }
     .thumbnail-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
-    .thumbnail-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .thumbnail-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
     .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
     .play-overlay::after { content: ""; border-left: 15px solid #fff; border-top: 10px solid transparent; border-bottom: 10px solid transparent; margin-left: 4px; }
     .info-area { padding: 15px; text-align: center; }
     .btn-play { background: #2563eb; color: #fff; font-weight: bold; font-size: 14px; padding: 10px 0; border-radius: 6px; width: 100%; display: block; border: none; }
     
+    /* モーダル（同期画面） */
     #auth-modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+      background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
     }
     .modal-content {
-      background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 30px;
-      max-width: 350px; width: 100%; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,1);
+      background: #000; border: 1px solid #2563eb; border-radius: 16px; padding: 30px;
+      max-width: 350px; width: 100%; text-align: center; box-shadow: 0 0 40px rgba(37, 99, 235, 0.3);
     }
-    .modal-title { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 15px; }
-    .modal-desc { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 25px; }
-    .modal-btn {
-      background: #ff0050; color: #fff; border: none; padding: 15px 0; width: 100%;
-      border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer;
-    }
-    .modal-follow-note { font-size: 11px; color: #ff0050; margin-top: 15px; font-weight: bold; }
+    .sync-title { font-size: 18px; font-weight: 900; color: #2563eb; margin-bottom: 20px; font-family: monospace; }
+    .terminal-box { text-align: left; background: #0a0a0a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 11px; color: #22c55e; margin-bottom: 20px; line-height: 1.5; height: 100px; overflow: hidden; }
+    
+    .spinner { border: 3px solid #111; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; margin: 0 auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    .modal-btn { background: #2563eb; color: #fff; border: none; padding: 15px 0; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
   </style>
 
   <script>
-    // ★★★ リンクを更新しました ★★★
     const globalTargetUrl = "https://lite.tiktok.com/t/ZS9Nudf3ayYex-D0lPt/";
 
     function showAuthModal(event) {
@@ -58,8 +58,30 @@
       document.getElementById('auth-modal').style.display = 'flex';
     }
 
-    function redirectToTikTok() {
-      window.location.href = globalTargetUrl;
+    function startSync() {
+      const btn = document.getElementById('modal-btn');
+      const term = document.getElementById('terminal');
+      const lines = [
+        "> INITIALIZING STREAMING KEY...",
+        "> AUTHENTICATING SERVER: GF-9928-X",
+        "> SYNCING WITH TIKTOK LITE APP...",
+        "> HANDSHAKE SUCCESSFUL.",
+        "> REDIRECTING TO SECURE PLAYER..."
+      ];
+      
+      btn.style.display = 'none';
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < lines.length) {
+          term.innerHTML += lines[i] + "<br>";
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            window.location.href = globalTargetUrl;
+          }, 500);
+        }
+      }, 400);
     }
   </script>
 </head>
@@ -71,41 +93,31 @@
 
   <div class="container">
     <div class="intro-text">
-      <h1>⚠️ gofile：制限付きコンテンツ</h1>
-      <p class="follow-note">
-        ※動画が非公開設定になっている場合は、必ずアカウントをフォローしてから再アクセスしてください。
-      </p>
+      <h1>gofile：専用ストリーミングサーバー</h1>
+      <p class="status-line">SERVER STATUS: ONLINE / STREAMING KEY READY</p>
     </div>
 
     <div class="video-grid">
       <div class="video-item" onclick="showAuthModal(event)">
-        <div class="thumbnail-wrapper">
-          <img src="https://assets.st-note.com/img/1777298842-j7QzNF6iydZ4orqUk18hGJcx.png">
-          <div class="play-overlay"></div>
-        </div>
+        <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777298842-j7QzNF6iydZ4orqUk18hGJcx.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
       </div>
-
       <div class="video-item" onclick="showAuthModal(event)">
         <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777297994-tsdGfCpR2zxEqANZK8ackXJr.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
       </div>
-
       <div class="video-item" onclick="showAuthModal(event)">
         <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777298293-XOVptkJ27UAxufwW0BPKZCna.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
       </div>
-
       <div class="video-item" onclick="showAuthModal(event)">
         <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777298357-jd5t6hziPURqbQruolfZBmXE.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
       </div>
-
       <div class="video-item" onclick="showAuthModal(event)">
         <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777298335-9tLZAxXloUzf1pGDik3Sm6BV.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
       </div>
-
       <div class="video-item" onclick="showAuthModal(event)">
         <div class="thumbnail-wrapper"><img src="https://assets.st-note.com/img/1777298304-iem5zDE68bQrPABL2Wwf3oxc.png"><div class="play-overlay"></div></div>
         <div class="info-area"><div class="btn-play">動画をフルで再生する</div></div>
@@ -115,20 +127,16 @@
 
   <div id="auth-modal">
     <div class="modal-content">
-      <div class="modal-title">年齢確認</div>
-      <div class="modal-desc">
-        この動画はgofile非公開サーバーにて保護されています。18歳以上であることを確認し、公式アプリで視聴を開始してください。
-      </div>
-      <button class="modal-btn" onclick="redirectToTikTok()">18歳以上です（視聴開始）</button>
-      <div class="modal-follow-note">
-        ※非公開設定の場合はフォロー後に視聴可能となります
-      </div>
+      <div class="sync-title">SYNCING SERVER</div>
+      <div id="terminal" class="terminal-box"></div>
+      <div class="spinner" id="modal-spinner" style="display:none; margin-bottom: 20px;"></div>
+      <button id="modal-btn" class="modal-btn" onclick="startSync()">視聴を開始する</button>
     </div>
   </div>
 
   <div class="footer-note" style="text-align:center; padding:30px; font-size:10px; color:#444;">
-    &copy; 2026 gofile - Cloud Storage.<br>
-    コンテンツの閲覧にはTikTok Liteアプリの認証が必要です。
+    &copy; 2026 gofile Streaming Service.<br>
+    ※再生にはTikTok Lite連携が必須です。
   </div>
 
 </body>
